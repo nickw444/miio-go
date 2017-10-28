@@ -65,7 +65,9 @@ func NewProtocol(c *ProtocolConfig) (Protocol, error) {
 		return packet.NewCrypto(deviceID, deviceToken, initialStamp, stampTime, clk)
 	}
 
-	return newProtocol(clk, t, deviceFactory, cryptoFactory, subscription.NewTarget()), nil
+	p := newProtocol(clk, t, deviceFactory, cryptoFactory, subscription.NewTarget())
+	p.start()
+	return p, nil
 }
 
 func newProtocol(c clock.Clock, transport transport.Transport, deviceFactory DeviceFactory,
@@ -82,9 +84,11 @@ func newProtocol(c clock.Clock, transport transport.Transport, deviceFactory Dev
 	}
 
 	p.broadcastDev = p.makeBroadcastDev()
-	go p.dispatcher()
-
 	return p
+}
+
+func (p *protocol) start() {
+	go p.dispatcher()
 }
 
 func (p *protocol) makeBroadcastDev() device.Device {

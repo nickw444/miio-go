@@ -4,7 +4,7 @@ build:
 	go build
 
 test:
-	go test ./...
+	go test --timeout 1s ./...
 
 mocks:
 	mockery -dir capability -all
@@ -19,10 +19,10 @@ mocks:
 #	mockery -output subscription/target/mocks -dir subscription -name "Subscription" -recursive
 
 cover:
-	gocov test ./... | gocov report
+	gocov test --timeout 1s ./... | gocov report
 
 cover-html:
-	gocov test ./... | gocov-html > coverage.html && open coverage.html
+	gocov test --timeout 1s ./... | gocov-html > coverage.html && open coverage.html
 
 mockery:
 	go get -u github.com/vektra/mockery/.../

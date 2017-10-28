@@ -66,9 +66,8 @@ func TestProtocol_dispatcher(t *testing.T) {
 	tt.transport.inbound.On("Packets").Return(ro(ch)).Run(func(args mock.Arguments) {
 		wg.Done()
 	})
-
+	tt.protocol.start()
 	wg.Wait()
-
 	tt.transport.inbound.AssertExpectations(t)
 }
 
