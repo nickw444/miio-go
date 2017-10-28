@@ -6,8 +6,8 @@ import (
 	"github.com/nickw444/miio-go/common"
 	"github.com/nickw444/miio-go/device/product"
 	"github.com/nickw444/miio-go/protocol/packet"
-	"github.com/nickw444/miio-go/protocol/transport"
 	"github.com/nickw444/miio-go/subscription"
+	"github.com/nickw444/miio-go/protocol/transport"
 )
 
 // baseDevice implements the Device interface.
