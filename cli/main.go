@@ -24,7 +24,6 @@ func onNewDevice(dev common.Device) {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println("MEMES")
 		go watchSubscription(sub)
 		go tick(d)
 
@@ -40,12 +39,10 @@ func watchSubscription(sub subscription.Subscription) {
 }
 
 func tick(d *device.PowerPlug) {
-	fmt.Println("TICKING")
 	currState := false
 	for {
 		select {
 		case <-time.After(time.Second * 5):
-			fmt.Println("AFTER 5 Secnods")
 			var s common.PowerState
 			if currState {
 				s = common.PowerStateOn

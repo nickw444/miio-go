@@ -10,11 +10,11 @@ type Outbound struct {
 }
 
 // Call provides a mock function with given fields: method, params
-func (_m *Outbound) Call(method string, params []string) ([]byte, error) {
+func (_m *Outbound) Call(method string, params interface{}) ([]byte, error) {
 	ret := _m.Called(method, params)
 
 	var r0 []byte
-	if rf, ok := ret.Get(0).(func(string, []string) []byte); ok {
+	if rf, ok := ret.Get(0).(func(string, interface{}) []byte); ok {
 		r0 = rf(method, params)
 	} else {
 		if ret.Get(0) != nil {
@@ -23,7 +23,7 @@ func (_m *Outbound) Call(method string, params []string) ([]byte, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, []string) error); ok {
+	if rf, ok := ret.Get(1).(func(string, interface{}) error); ok {
 		r1 = rf(method, params)
 	} else {
 		r1 = ret.Error(1)
@@ -33,11 +33,11 @@ func (_m *Outbound) Call(method string, params []string) ([]byte, error) {
 }
 
 // CallAndDeserialize provides a mock function with given fields: method, params, resp
-func (_m *Outbound) CallAndDeserialize(method string, params []string, resp interface{}) error {
+func (_m *Outbound) CallAndDeserialize(method string, params interface{}, resp interface{}) error {
 	ret := _m.Called(method, params, resp)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, []string, interface{}) error); ok {
+	if rf, ok := ret.Get(0).(func(string, interface{}, interface{}) error); ok {
 		r0 = rf(method, params, resp)
 	} else {
 		r0 = ret.Error(0)

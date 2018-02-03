@@ -91,7 +91,7 @@ func TestBaseDevice_Provisional(t *testing.T) {
 }
 
 func BaseDevice_GetProduct_Setup(outbound *mocks.Outbound) {
-	outbound.On("CallAndDeserialize", "miIO.info", mock.AnythingOfType("[]string"), mock.Anything).
+	outbound.On("CallAndDeserialize", "miIO.info", mock.Anything, mock.Anything).
 		Return(nil).
 		Run(func(args mock.Arguments) {
 			resp := args.Get(2).(*InfoResponse)

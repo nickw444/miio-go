@@ -23,10 +23,10 @@ type Outbound interface {
 	// Handle handles incoming packets and triggers waiting continuations.
 	Handle(pkt *packet.Packet) error
 	// Call makes a call, waits for a response and returns the raw bytes returned.
-	Call(method string, params []string) ([]byte, error)
+	Call(method string, params interface{}) ([]byte, error)
 	// CallAndDeserialize makes a call, waits for a response and deserialises the JSON
 	// payload into `ret`.
-	CallAndDeserialize(method string, params []string, resp interface{}) error
+	CallAndDeserialize(method string, params interface{}, resp interface{}) error
 	// Send will send a raw packet without waiting for a response.
 	Send(packet *packet.Packet) error
 }
@@ -98,7 +98,7 @@ func (o *outbound) Handle(pkt *packet.Packet) error {
 	return nil
 }
 
-func (o *outbound) Call(method string, params []string) ([]byte, error) {
+func (o *outbound) Call(method string, params interface{}) ([]byte, error) {
 	defer func() { o.nextReqID++ }()
 
 	// Setup a continuation channel
@@ -132,7 +132,7 @@ func (o *outbound) Call(method string, params []string) ([]byte, error) {
 	return nil, err
 }
 
-func (o *outbound) CallAndDeserialize(method string, params []string, ret interface{}) error {
+func (o *outbound) CallAndDeserialize(method string, params interface{}, ret interface{}) error {
 	resp, err := o.Call(method, params)
 	err = json.Unmarshal(resp, ret)
 	if err != nil {
@@ -148,11 +148,7 @@ func (o *outbound) Send(packet *packet.Packet) error {
 }
 
 // Call out to the device, but don't wait for a response.
-func (o *outbound) call(requestId requestID, method string, params []string) (err error) {
-	if params == nil {
-		params = make([]string, 0)
-	}
-
+func (o *outbound) call(requestId requestID, method string, params interface{}) (err error) {
 	data, err := json.Marshal(request{
 		ID:     requestId,
 		Method: method,
@@ -177,7 +173,7 @@ type response struct {
 }
 
 type request struct {
-	ID     requestID `json:"id"`
-	Method string    `json:"method"`
-	Params []string  `json:"params"`
+	ID     requestID   `json:"id"`
+	Method string      `json:"method"`
+	Params interface{} `json:"params"`
 }
