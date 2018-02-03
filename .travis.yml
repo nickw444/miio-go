@@ -1,9 +1,6 @@
 language: go
-
 go:
   - 1.x
-
 script:
   - ./ci/check_mocks.sh
   - make test
-
