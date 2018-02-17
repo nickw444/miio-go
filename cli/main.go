@@ -65,8 +65,6 @@ func main() {
 		panic(err)
 	}
 
-	client.SetDiscoveryInterval(time.Second * 10)
-
 	sub, err := client.NewSubscription()
 	if err != nil {
 		panic(err)

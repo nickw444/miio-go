@@ -1,8 +1,9 @@
-package device
+package rthrottle
 
 import (
-	"github.com/benbjohnson/clock"
 	"time"
+
+	"github.com/benbjohnson/clock"
 )
 
 type RefreshThrottle interface {

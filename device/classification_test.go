@@ -3,14 +3,14 @@ package device
 import (
 	"testing"
 
+	deviceMocks "github.com/nickw444/miio-go/device/mocks"
 	"github.com/nickw444/miio-go/device/product"
-	"github.com/nickw444/miio-go/mocks"
 	"github.com/stretchr/testify/assert"
 )
 
 // Device is set to non-provisional after classify.
 func TestClassify1(t *testing.T) {
-	baseDev := &mocks.Device{}
+	baseDev := &deviceMocks.Device{}
 	baseDev.On("Provisional").Return(true)
 	baseDev.On("GetProduct").Return(product.Unknown, nil)
 	baseDev.On("SetProvisional", false).Once()
@@ -21,7 +21,7 @@ func TestClassify1(t *testing.T) {
 
 // Non-provisional devices are not classified
 func TestClassify2(t *testing.T) {
-	baseDev := &mocks.Device{}
+	baseDev := &deviceMocks.Device{}
 	baseDev.On("Provisional").Return(false)
 
 	dev, err := Classify(baseDev)
@@ -29,8 +29,8 @@ func TestClassify2(t *testing.T) {
 	assert.Equal(t, baseDev, dev)
 }
 
-func Classify_SetUp(product product.Product) *mocks.Device {
-	dev := &mocks.Device{}
+func Classify_SetUp(product product.Product) *deviceMocks.Device {
+	dev := &deviceMocks.Device{}
 	dev.On("Provisional").Return(true)
 	dev.On("GetProduct").Return(product, nil)
 	dev.On("SetProvisional", false)

@@ -1,7 +1,6 @@
 package protocol
 
 import (
-	"fmt"
 	"net"
 	"sync"
 	"time"
@@ -123,7 +122,7 @@ func (p *protocol) dispatcher() {
 }
 
 func (p *protocol) Discover() error {
-	common.Log.Debug("Running discovery...")
+	common.Log.Debugf("Running discovery...")
 
 	if p.lastDiscovery.After(time.Time{}) {
 		// If the device has not been seen recently, it should be expired.
@@ -132,7 +131,7 @@ func (p *protocol) Discover() error {
 		p.devicesMutex.RLock()
 		for _, dev := range p.devices {
 			if dev.Seen().Before(cutoff) {
-				common.Log.Infof("Last Seen: %s, Cutoff: %s", dev.Seen(), cutoff)
+				common.Log.Debugf("Device %d is stale. Last Seen at %s", dev.ID(), dev.Seen())
 				expiredDevices = append(expiredDevices, dev)
 			}
 		}
@@ -160,7 +159,6 @@ func (p *protocol) process(pkt *packet.Packet) {
 
 	dev := p.getDevice(pkt.Header.DeviceID)
 	if dev == nil && pkt.DataLength() == 0 {
-
 		// Device response to a Hello packet.
 		crypto, err := p.cryptoFactory(pkt.Header.DeviceID, pkt.Header.Checksum, pkt.Header.Stamp,
 			pkt.Meta.DecodeTime)
@@ -184,12 +182,13 @@ func (p *protocol) process(pkt *packet.Packet) {
 		p.addDevice(dev)
 		p.Publish(common.EventNewDevice{Device: dev})
 	} else if dev != nil {
+		// Known device. Handle the incoming packet.
 		err := dev.Handle(pkt)
 		if err != nil {
-			panic(err)
+			common.Log.Errorf("Unable to process packet %s for device %d. Error %s", pkt, dev.ID(), err)
 		}
 	} else {
-		panic(fmt.Errorf("Unable to process packet."))
+		common.Log.Errorf("Unable to process packet %s. Device unknown.", pkt)
 	}
 }
 

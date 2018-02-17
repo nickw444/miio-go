@@ -4,19 +4,19 @@ import (
 	"testing"
 
 	"github.com/nickw444/miio-go/common"
-	"github.com/nickw444/miio-go/mocks"
-	mocks2 "github.com/nickw444/miio-go/subscription/mocks"
+	transportMocks "github.com/nickw444/miio-go/protocol/transport/mocks"
+	subscriptionMocks "github.com/nickw444/miio-go/subscription/common/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
 func Power_SetUp() (tt struct {
 	power    *Power
-	outbound *mocks.Outbound
-	target   *mocks2.SubscriptionTarget
+	outbound *transportMocks.Outbound
+	target   *subscriptionMocks.SubscriptionTarget
 }) {
-	tt.target = new(mocks2.SubscriptionTarget)
-	tt.outbound = new(mocks.Outbound)
+	tt.target = new(subscriptionMocks.SubscriptionTarget)
+	tt.outbound = new(transportMocks.Outbound)
 	tt.power = NewPower(tt.target, tt.outbound)
 	return
 }

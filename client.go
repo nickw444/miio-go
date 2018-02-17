@@ -4,6 +4,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/nickw444/miio-go/common"
 	"github.com/nickw444/miio-go/protocol"
 	"github.com/nickw444/miio-go/subscription"
 )
@@ -35,6 +36,8 @@ func NewClientWithProtocol(protocol protocol.Protocol) (*Client, error) {
 		quitChan:           make(chan struct{}),
 	}
 
+	c.SetDiscoveryInterval(time.Second * 15)
+
 	return c, c.init()
 }
 
@@ -45,18 +48,18 @@ func (c *Client) init() error {
 	return c.discover()
 }
 
-func (c *Client) SetDiscoveryInterval(interval time.Duration) error {
-	// TODO Clean up existing discovery goroutines.
+func (c *Client) SetDiscoveryInterval(interval time.Duration) {
 	c.discoveryInterval = interval
-	c.protocol.SetExpiryTime(interval * 3)
-	return c.discover()
+	c.protocol.SetExpiryTime(interval * 2)
 }
 
 func (c *Client) discover() error {
 	if c.discoveryInterval == 0 {
-		//common.Log.Debugf("Discovery interval is zero, discovery will only be performed once")
+		common.Log.Debugf("Discovery interval is zero, discovery will only be performed once")
 		return c.protocol.Discover()
 	}
+
+	_ = c.protocol.Discover()
 
 	go func() {
 		c.RLock()
@@ -65,16 +68,16 @@ func (c *Client) discover() error {
 		for {
 			select {
 			case <-c.quitChan:
-				//common.Log.Debugf("Quitting discoveryfile loop")
+				common.Log.Debugf("Quitting discovery loop")
 				return
 			default:
 			}
 			select {
 			case <-c.quitChan:
-				//common.Log.Debugf("Quitting discovery loop")
+				common.Log.Debugf("Quitting discovery loop")
 				return
 			case <-tick:
-				//common.Log.Debugf("Performing discovery")
+				common.Log.Debugf("Performing discovery")
 				_ = c.protocol.Discover()
 			}
 		}

@@ -4,9 +4,9 @@
 
 set -euo pipefail
 
-go get github.com/vektra/mockery/.../
 export PATH=$PATH:$GOPATH/bin
 make mocks
 if ! git diff --exit-code HEAD; then
-  error "Mocks are not up to date, please run: make mocks"
+  echo "Mocks are not up to date, please run: make mocks"
+  exit 1
 fi
