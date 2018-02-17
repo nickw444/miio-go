@@ -8,10 +8,11 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/nickw444/miio-go/device"
-	"github.com/nickw444/miio-go/mocks"
+	deviceMocks "github.com/nickw444/miio-go/device/mocks"
 	"github.com/nickw444/miio-go/protocol/packet"
 	"github.com/nickw444/miio-go/protocol/transport"
-	smocks "github.com/nickw444/miio-go/subscription/mocks"
+	transportMocks "github.com/nickw444/miio-go/protocol/transport/mocks"
+	subscriptionMocks "github.com/nickw444/miio-go/subscription/common/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -21,15 +22,15 @@ func Protocol_SetUp() (tt struct {
 	transport          *mockTransport
 	deviceFactory      DeviceFactory
 	cryptoFactory      CryptoFactory
-	subscriptionTarget *smocks.SubscriptionTarget
+	subscriptionTarget *subscriptionMocks.SubscriptionTarget
 	protocol           *protocol
-	devices            []*mocks.Device
+	devices            []*deviceMocks.Device
 }) {
 	tt.clk = clock.NewMock()
-	tt.transport = &mockTransport{new(mocks.Inbound)}
-	tt.subscriptionTarget = new(smocks.SubscriptionTarget)
+	tt.transport = &mockTransport{new(transportMocks.Inbound)}
+	tt.subscriptionTarget = new(subscriptionMocks.SubscriptionTarget)
 	tt.deviceFactory = func(deviceId uint32, outbound transport.Outbound, seen time.Time) device.Device {
-		d := &mocks.Device{}
+		d := &deviceMocks.Device{}
 		d.On("Discover").Return(nil)
 		//d.On("Packets").Return(nil)
 		tt.devices = append(tt.devices, d)
@@ -72,7 +73,7 @@ func TestProtocol_dispatcher(t *testing.T) {
 }
 
 type mockTransport struct {
-	inbound *mocks.Inbound
+	inbound *transportMocks.Inbound
 }
 
 func (m *mockTransport) Inbound() transport.Inbound {
@@ -80,7 +81,7 @@ func (m *mockTransport) Inbound() transport.Inbound {
 }
 
 func (*mockTransport) NewOutbound(crypto packet.Crypto, dest net.Addr) transport.Outbound {
-	return &mocks.Outbound{}
+	return &transportMocks.Outbound{}
 }
 
 func (*mockTransport) Close() error {

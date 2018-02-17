@@ -5,16 +5,17 @@ import (
 
 	"github.com/nickw444/miio-go/common"
 	"github.com/nickw444/miio-go/device/product"
+	"github.com/nickw444/miio-go/device/rthrottle"
 	"github.com/nickw444/miio-go/protocol/packet"
-	"github.com/nickw444/miio-go/subscription"
 	"github.com/nickw444/miio-go/protocol/transport"
+	"github.com/nickw444/miio-go/subscription"
 )
 
 // baseDevice implements the Device interface.
 type baseDevice struct {
 	subscription.SubscriptionTarget
 
-	refreshThrottle RefreshThrottle
+	refreshThrottle rthrottle.RefreshThrottle
 	outbound        transport.Outbound
 
 	product     product.Product
@@ -23,20 +24,13 @@ type baseDevice struct {
 	seen        time.Time
 }
 
-type Info struct {
-	FirmwareVersion string `json:"fw_ver"`
-	HardwareVersion string `json:"hw_ver"`
-	MacAddress      string `json:"mac"`
-	Model           string `json:"model"`
-}
-
 type InfoResponse struct {
-	Result Info  `json:"result"`
-	ID     int32 `json:"ID"`
+	Result common.DeviceInfo `json:"result"`
+	ID     int32             `json:"ID"`
 }
 
 func New(deviceId uint32, transport transport.Outbound, seen time.Time) Device {
-	throttle := NewRefreshThrottle(time.Second * 5)
+	throttle := rthrottle.NewRefreshThrottle(time.Second * 5)
 	b := &baseDevice{
 		SubscriptionTarget: subscription.NewTarget(),
 
@@ -63,7 +57,7 @@ func (b *baseDevice) GetLabel() (string, error) {
 }
 
 func (b *baseDevice) Handle(pkt *packet.Packet) error {
-	common.Log.Infof("Handling packet at base_device")
+	common.Log.Debugf("Handling packet at base_device")
 	b.seen = pkt.Meta.DecodeTime
 	return b.outbound.Handle(pkt)
 }
@@ -94,6 +88,12 @@ func (b *baseDevice) GetProduct() (product.Product, error) {
 	}
 
 	return product.GetModel(resp.Result.Model)
+}
+
+func (b *baseDevice) GetInfo() (common.DeviceInfo, error) {
+	resp := InfoResponse{}
+	err := b.outbound.CallAndDeserialize("miIO.info", nil, &resp)
+	return resp.Result, err
 }
 
 func (b *baseDevice) Discover() error {

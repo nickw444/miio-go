@@ -10,6 +10,7 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/nickw444/miio-go/common"
 	"github.com/nickw444/miio-go/protocol/packet"
+	"sync"
 )
 
 type OutboundConn interface {
@@ -44,11 +45,12 @@ type outbound struct {
 	socket OutboundConn
 
 	nextReqID     requestID
+	continuationsMutex sync.RWMutex
 	continuations map[requestID]chan []byte
 }
 
 func NewOutbound(crypto packet.Crypto, dest net.Addr, socket OutboundConn) Outbound {
-	return newOutbound(5, time.Second*1, clock.New(), crypto, dest, socket)
+	return newOutbound(10, time.Millisecond*200, clock.New(), crypto, dest, socket)
 }
 
 func newOutbound(maxRetries int, timeout time.Duration, clock clock.Clock, crypto packet.Crypto,
@@ -88,12 +90,14 @@ func (o *outbound) Handle(pkt *packet.Packet) error {
 	}
 
 	// Lookup the response ID and pass data to the appropriate continuation goroutine.
+	o.continuationsMutex.RLock()
 	if ch, ok := o.continuations[resp.ID]; ok {
 		common.Log.Debugf("Callback with ID %d was reconciled", resp.ID)
 		ch <- data
 	} else {
 		common.Log.Debugf("Unable to reconcile callback for resp id %d", resp.ID)
 	}
+	o.continuationsMutex.RUnlock()
 
 	return nil
 }
@@ -102,13 +106,17 @@ func (o *outbound) Call(method string, params interface{}) ([]byte, error) {
 	defer func() { o.nextReqID++ }()
 
 	// Setup a continuation channel
+	o.continuationsMutex.Lock()
 	ch := make(chan []byte)
 	o.continuations[o.nextReqID] = ch
+	o.continuationsMutex.Unlock()
 
 	// Ensure we cleanup.
 	defer func() {
+		o.continuationsMutex.Lock()
 		delete(o.continuations, o.nextReqID)
 		close(ch)
+		o.continuationsMutex.Unlock()
 	}()
 
 	for i := 0; i < o.maxRetries+1; i++ {
@@ -122,7 +130,7 @@ func (o *outbound) Call(method string, params interface{}) ([]byte, error) {
 		case data := <-ch:
 			return data, nil
 		case <-o.clock.After(o.timeout):
-			common.Log.Infof("Timed out whilst waiting for response.")
+			common.Log.Debugf("Timed out whilst waiting for response.")
 			continue
 		}
 	}

@@ -1,4 +1,4 @@
-package device
+package rthrottle
 
 import (
 	"sync"

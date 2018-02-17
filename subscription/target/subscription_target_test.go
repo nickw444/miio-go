@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/nickw444/miio-go/subscription/common"
-	"github.com/nickw444/miio-go/subscription/mocks"
+	"github.com/nickw444/miio-go/subscription/common/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

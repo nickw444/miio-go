@@ -1,17 +1,16 @@
 package device
 
 import (
-	"testing"
-
 	"bytes"
-
+	"testing"
 	"time"
 
 	"github.com/benbjohnson/clock"
+	deviceMocks "github.com/nickw444/miio-go/device/mocks"
 	"github.com/nickw444/miio-go/device/product"
-	"github.com/nickw444/miio-go/mocks"
 	"github.com/nickw444/miio-go/protocol/packet"
-	mocks2 "github.com/nickw444/miio-go/subscription/mocks"
+	transportMocks "github.com/nickw444/miio-go/protocol/transport/mocks"
+	subscriptionMocks "github.com/nickw444/miio-go/subscription/common/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -19,16 +18,16 @@ import (
 func BaseDevice_SetUp() (ret struct {
 	deviceId  uint32
 	clk       *clock.Mock
-	subTgt    *mocks2.SubscriptionTarget
-	outbound  *mocks.Outbound
-	rThrottle *mocks.RefreshThrottle
+	subTgt    *subscriptionMocks.SubscriptionTarget
+	outbound  *transportMocks.Outbound
+	rThrottle *deviceMocks.RefreshThrottle
 	device    *baseDevice
 }) {
 	ret.deviceId = 10
 	ret.clk = clock.NewMock()
-	ret.subTgt = &mocks2.SubscriptionTarget{}
-	ret.outbound = &mocks.Outbound{}
-	ret.rThrottle = &mocks.RefreshThrottle{}
+	ret.subTgt = &subscriptionMocks.SubscriptionTarget{}
+	ret.outbound = &transportMocks.Outbound{}
+	ret.rThrottle = &deviceMocks.RefreshThrottle{}
 	ret.device = &baseDevice{
 		SubscriptionTarget: ret.subTgt,
 		refreshThrottle:    ret.rThrottle,
@@ -90,7 +89,7 @@ func TestBaseDevice_Provisional(t *testing.T) {
 	assert.True(t, tt.device.provisional)
 }
 
-func BaseDevice_GetProduct_Setup(outbound *mocks.Outbound) {
+func BaseDevice_GetProduct_Setup(outbound *transportMocks.Outbound) {
 	outbound.On("CallAndDeserialize", "miIO.info", mock.Anything, mock.Anything).
 		Return(nil).
 		Run(func(args mock.Arguments) {
@@ -129,7 +128,7 @@ func TestBaseDevice_Discover(t *testing.T) {
 
 }
 
-func BaseDevice_NewSubscription_Setup(throttle *mocks.RefreshThrottle, target *mocks2.SubscriptionTarget) {
+func BaseDevice_NewSubscription_Setup(throttle *deviceMocks.RefreshThrottle, target *subscriptionMocks.SubscriptionTarget) {
 	throttle.On("Start")
 	target.On("NewSubscription").Return(nil, nil)
 }
