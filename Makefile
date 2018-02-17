@@ -4,7 +4,7 @@ build:
 	go build
 
 test:
-	go test --timeout 1s ./...
+	go test -v --timeout 1s ./...
 
 mocks:
 	find . -name "mocks" | xargs rm -rf
@@ -22,14 +22,7 @@ cover:
 cover-html:
 	gocov test --timeout 1s ./... | gocov-html > coverage.html && open coverage.html
 
-mockery:
-	go get -u github.com/vektra/mockery/.../
-
-coverage:
+install_tools:
 	go get github.com/axw/gocov/gocov
 	go get -u gopkg.in/matm/v1/gocov-html
-
-tools:
-	go get github.com/golang/mock/gomock
-	go get github.com/golang/mock/mockgen
-
+	go get -u github.com/vektra/mockery/.../

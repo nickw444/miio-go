@@ -2,6 +2,9 @@ language: go
 go:
   - 1.x
 
+before_script:
+  - make install_tools
+
 script:
   - ./ci/check_mocks.sh
   - make test
