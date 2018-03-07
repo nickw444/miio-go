@@ -7,10 +7,11 @@ import (
 	"net"
 	"time"
 
+	"sync"
+
 	"github.com/benbjohnson/clock"
 	"github.com/nickw444/miio-go/common"
 	"github.com/nickw444/miio-go/protocol/packet"
-	"sync"
 )
 
 type OutboundConn interface {
@@ -44,9 +45,9 @@ type outbound struct {
 	dest   net.Addr
 	socket OutboundConn
 
-	nextReqID     requestID
+	nextReqID          requestID
 	continuationsMutex sync.RWMutex
-	continuations map[requestID]chan []byte
+	continuations      map[requestID]chan []byte
 }
 
 func NewOutbound(crypto packet.Crypto, dest net.Addr, socket OutboundConn) Outbound {
@@ -83,7 +84,7 @@ func (o *outbound) Handle(pkt *packet.Packet) error {
 		panic(err)
 	}
 
-	resp := response{}
+	resp := Response{}
 	err = json.Unmarshal(data, &resp)
 	if err != nil {
 		return err
@@ -157,7 +158,7 @@ func (o *outbound) Send(packet *packet.Packet) error {
 
 // Call out to the device, but don't wait for a response.
 func (o *outbound) call(requestId requestID, method string, params interface{}) (err error) {
-	data, err := json.Marshal(request{
+	data, err := json.Marshal(Request{
 		ID:     requestId,
 		Method: method,
 		Params: params,
@@ -175,12 +176,12 @@ func (o *outbound) call(requestId requestID, method string, params interface{}) 
 	return
 }
 
-type response struct {
+type Response struct {
 	ID     requestID   `json:"id"`
 	Result interface{} `json:"result"`
 }
 
-type request struct {
+type Request struct {
 	ID     requestID   `json:"id"`
 	Method string      `json:"method"`
 	Params interface{} `json:"params"`

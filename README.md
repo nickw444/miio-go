@@ -18,6 +18,14 @@ At the moment, only the following devices are officially supported by this libra
 
 [API Documentation can be found here]()
 
+## Simulator
+
+A device simulator/emulator exists in the [simulator](simulator/) package. It takes
+advantage of the low level network used to communicate with real devices to emulate
+hardware devices.
+
+[Give it a try!](simulator/)
+
 ## Tokens
 Documentation coming soon...
 
