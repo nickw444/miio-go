@@ -2,8 +2,13 @@ language: go
 go:
   - 1.x
 
-before_script:
+before_install:
+  - go get -u github.com/golang/dep/cmd/dep
+
+install:
   - dep ensure
+
+before_script:
   - make install_tools
 
 script:
