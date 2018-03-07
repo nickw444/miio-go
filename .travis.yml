@@ -3,6 +3,7 @@ go:
   - 1.x
 
 before_script:
+  - dep ensure
   - make install_tools
 
 script:
