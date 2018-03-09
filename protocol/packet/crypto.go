@@ -75,7 +75,7 @@ func (c *crypto) Decrypt(data []byte) ([]byte, error) {
 	decrypted := make([]byte, len(data))
 	stream.CryptBlocks(decrypted, data)
 
-	return c.pkcs5Unpad(decrypted, block.BlockSize())
+	return pkcs5Unpad(decrypted, block.BlockSize())
 }
 
 func (c *crypto) Encrypt(data []byte) ([]byte, error) {
@@ -84,30 +84,12 @@ func (c *crypto) Encrypt(data []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	data = c.pkcs5Pad(data, block.BlockSize())
+	data = pkcs5Pad(data, block.BlockSize())
 	stream := cipher.NewCBCEncrypter(block, c.iv)
 
 	encrypted := make([]byte, len(data))
 	stream.CryptBlocks(encrypted, []byte(data))
 	return encrypted, nil
-}
-
-// Pad using PKCS5 padding scheme.
-func (c *crypto) pkcs5Pad(data []byte, blockSize int) []byte {
-	length := len(data)
-	padLength := (blockSize - (length % blockSize))
-	pad := bytes.Repeat([]byte{byte(padLength)}, padLength)
-	return append(data, pad...)
-}
-
-// Unpad using PKCS5 padding scheme.
-func (c *crypto) pkcs5Unpad(data []byte, blockSize int) ([]byte, error) {
-	srcLen := len(data)
-	paddingLen := int(data[srcLen-1])
-	if paddingLen >= srcLen || paddingLen > blockSize {
-		return nil, fmt.Errorf("Padding size error whilst decrypting payload.")
-	}
-	return data[:srcLen-paddingLen], nil
 }
 
 func (c *crypto) getStamp() uint32 {
@@ -130,4 +112,22 @@ func (c *crypto) NewPacket(data []byte) (*Packet, error) {
 	}
 
 	return p, nil
+}
+
+// Pad using PKCS5 padding scheme.
+func pkcs5Pad(data []byte, blockSize int) []byte {
+	length := len(data)
+	padLength := (blockSize - (length % blockSize))
+	pad := bytes.Repeat([]byte{byte(padLength)}, padLength)
+	return append(data, pad...)
+}
+
+// Unpad using PKCS5 padding scheme.
+func pkcs5Unpad(data []byte, blockSize int) ([]byte, error) {
+	srcLen := len(data)
+	paddingLen := int(data[srcLen-1])
+	if paddingLen >= srcLen || paddingLen > blockSize {
+		return nil, fmt.Errorf("Padding size error whilst decrypting payload. Src Length: %d, Padding Length: %d, Block Size: %d", srcLen, paddingLen, blockSize)
+	}
+	return data[:srcLen-paddingLen], nil
 }
