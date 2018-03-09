@@ -44,6 +44,8 @@ func main() {
 		dev = device.NewSimulatedYeelight(baseDev)
 	} else if *deviceType == "powerplug" {
 		dev = device.NewSimulatedPowerPlug(baseDev)
+	} else {
+		panic("Unknown device type.")
 	}
 
 	for pkt := range inbound.Packets() {
