@@ -1,6 +1,7 @@
 package miio
 
 import (
+	"net"
 	"sync"
 	"time"
 
@@ -21,7 +22,11 @@ type Client struct {
 
 // NewClient creates a new default Client with the protocol.
 func NewClient() (*Client, error) {
-	p, err := protocol.NewProtocol(nil)
+	protocolConfig := protocol.ProtocolConfig{
+		BroadcastIP: net.IPv4bcast,
+	}
+
+	p, err := protocol.NewProtocol(protocolConfig)
 	if err != nil {
 		return nil, err
 	}

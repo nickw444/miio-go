@@ -25,21 +25,22 @@ func Protocol_SetUp() (tt struct {
 	subscriptionTarget *subscriptionMocks.SubscriptionTarget
 	protocol           *protocol
 	devices            []*deviceMocks.Device
+	broadcastDevice    *deviceMocks.Device
 }) {
 	tt.clk = clock.NewMock()
 	tt.transport = &mockTransport{new(transportMocks.Inbound)}
 	tt.subscriptionTarget = new(subscriptionMocks.SubscriptionTarget)
 	tt.deviceFactory = func(deviceId uint32, outbound transport.Outbound, seen time.Time) device.Device {
 		d := &deviceMocks.Device{}
-		d.On("Discover").Return(nil)
-		//d.On("Packets").Return(nil)
 		tt.devices = append(tt.devices, d)
 		return d
 	}
 	tt.cryptoFactory = func(deviceID uint32, deviceToken []byte, initialStamp uint32, stampTime time.Time) (packet.Crypto, error) {
 		return nil, nil
 	}
-	tt.protocol = newProtocol(tt.clk, tt.transport, tt.deviceFactory, tt.cryptoFactory, tt.subscriptionTarget)
+	tt.broadcastDevice = &deviceMocks.Device{}
+	tt.broadcastDevice.On("Discover").Return(nil)
+	tt.protocol = newProtocol(tt.clk, tt.transport, tt.deviceFactory, tt.cryptoFactory, tt.subscriptionTarget, tt.broadcastDevice)
 	return
 }
 
@@ -49,7 +50,7 @@ func TestProtocol_Discover(t *testing.T) {
 
 	err := tt.protocol.Discover()
 	assert.NoError(t, err)
-	tt.devices[0].AssertCalled(t, "Discover")
+	tt.broadcastDevice.AssertCalled(t, "Discover")
 }
 
 // Ensure that inbound's Packets method is called.

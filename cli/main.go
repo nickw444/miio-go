@@ -2,11 +2,14 @@ package main
 
 import (
 	"fmt"
+	"net"
 
 	"time"
 
+	"github.com/alecthomas/kingpin"
 	"github.com/nickw444/miio-go"
 	"github.com/nickw444/miio-go/device"
+	"github.com/nickw444/miio-go/protocol"
 
 	"github.com/nickw444/miio-go/common"
 	"github.com/nickw444/miio-go/subscription"
@@ -56,11 +59,29 @@ func tick(d *device.PowerPlug) {
 }
 
 func main() {
+	var (
+		local = kingpin.Flag("local", "Send broadcast to 127.0.0.1 instead of 255.255.255.255 (For use with locally hosted simulator)").Bool()
+	)
+
+	kingpin.Parse()
+
 	l := logrus.New()
 	l.SetLevel(logrus.InfoLevel)
 	common.SetLogger(l)
 
-	client, err := miio.NewClient()
+	addr := net.IPv4bcast
+	if (*local) {
+		addr = net.IPv4(127, 0, 0, 1)
+	}
+
+	proto, err := protocol.NewProtocol(protocol.ProtocolConfig{
+		BroadcastIP: addr,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	client, err := miio.NewClientWithProtocol(proto)
 	if err != nil {
 		panic(err)
 	}

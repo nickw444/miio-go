@@ -41,13 +41,17 @@ type DeviceFactory func(deviceId uint32, outbound transport.Outbound, seen time.
 type CryptoFactory func(deviceID uint32, deviceToken []byte, initialStamp uint32, stampTime time.Time) (packet.Crypto, error)
 
 type ProtocolConfig struct {
-	ListenPort int
+	// Required config
+	BroadcastIP net.IP
+
+	// Optional config
+	ListenPort int // Defaults to a random system-assigned port if not provided.
 }
 
-func NewProtocol(c *ProtocolConfig) (Protocol, error) {
+func NewProtocol(c ProtocolConfig) (Protocol, error) {
 	clk := clock.New()
 	var listenAddr *net.UDPAddr
-	if c != nil && c.ListenPort != 0 {
+	if c.ListenPort != 0 {
 		listenAddr = &net.UDPAddr{Port: c.ListenPort}
 	}
 
@@ -64,13 +68,19 @@ func NewProtocol(c *ProtocolConfig) (Protocol, error) {
 		return packet.NewCrypto(deviceID, deviceToken, initialStamp, stampTime, clk)
 	}
 
-	p := newProtocol(clk, t, deviceFactory, cryptoFactory, subscription.NewTarget())
+	addr := &net.UDPAddr{
+		IP:   c.BroadcastIP,
+		Port: 54321,
+	}
+	broadcastDev := deviceFactory(0, t.NewOutbound(nil, addr), time.Time{})
+
+	p := newProtocol(clk, t, deviceFactory, cryptoFactory, subscription.NewTarget(), broadcastDev)
 	p.start()
 	return p, nil
 }
 
 func newProtocol(c clock.Clock, transport transport.Transport, deviceFactory DeviceFactory,
-	crptoFactory CryptoFactory, target subscription.SubscriptionTarget) *protocol {
+	crptoFactory CryptoFactory, target subscription.SubscriptionTarget, broadcastDev device.Device) *protocol {
 
 	p := &protocol{
 		SubscriptionTarget: target,
@@ -80,23 +90,13 @@ func newProtocol(c clock.Clock, transport transport.Transport, deviceFactory Dev
 		clock:              c,
 		quitChan:           make(chan struct{}),
 		devices:            make(map[uint32]device.Device),
+		broadcastDev:       broadcastDev,
 	}
-
-	p.broadcastDev = p.makeBroadcastDev()
 	return p
 }
 
 func (p *protocol) start() {
 	go p.dispatcher()
-}
-
-func (p *protocol) makeBroadcastDev() device.Device {
-	addr := &net.UDPAddr{
-		IP:   net.IPv4(255, 255, 255, 255),
-		Port: 54321,
-	}
-	t := p.transport.NewOutbound(nil, addr)
-	return p.deviceFactory(0, t, time.Time{})
 }
 
 func (p *protocol) SetExpiryTime(duration time.Duration) {
