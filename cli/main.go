@@ -70,7 +70,7 @@ func main() {
 	common.SetLogger(l)
 
 	addr := net.IPv4bcast
-	if (*local) {
+	if *local {
 		addr = net.IPv4(127, 0, 0, 1)
 	}
 

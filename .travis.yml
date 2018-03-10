@@ -2,15 +2,18 @@ language: go
 go:
   - 1.x
 
+env:
+ - PATH=$PATH:$GOPATH/bin
+
 before_install:
   - go get -u github.com/golang/dep/cmd/dep
+  - go get -u github.com/mattn/goveralls
 
 install:
+  - ./bin/install_tools.sh
   - dep ensure
 
-before_script:
-  - make install_tools
-
 script:
-  - ./ci/check_mocks.sh
-  - make test
+  - ./bin/check_fmt.sh
+  - ./bin/check_mocks.sh
+  - ./bin/coveralls.sh

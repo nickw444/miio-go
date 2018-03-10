@@ -1,4 +1,7 @@
 # miio-go
+
+[![Coverage Status](https://coveralls.io/repos/github/nickw444/miio-go/badge.svg?branch=master)](https://coveralls.io/github/nickw444/miio-go?branch=master)
+
 An implementation of the miIO home protocol by Xiaomi written in Golang. Heavily inspired by:
 
  - [The Javascript Implementation](https://github.com/aholstenson/miio)

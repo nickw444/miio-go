@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
+set -eu
 
-# Checks if mocks need re-generating
+ROOT_DIR=$(cd "$(dirname "$0")"/.. && pwd)
+cd ${ROOT_DIR}
 
-set -euo pipefail
-
-export PATH=$PATH:$GOPATH/bin
-make mocks
+./bin/regenerate_mocks.sh
 if ! git diff --exit-code HEAD; then
   echo "Mocks are not up to date, please run: make mocks"
   exit 1
