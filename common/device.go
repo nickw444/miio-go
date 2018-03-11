@@ -15,4 +15,5 @@ type Device interface {
 	ID() uint32
 	GetLabel() (string, error)
 	GetInfo() (DeviceInfo, error)
+	GetToken() []byte
 }

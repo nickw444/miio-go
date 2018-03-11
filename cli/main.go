@@ -1,106 +1,59 @@
 package main
 
 import (
-	"fmt"
 	"net"
-
-	"time"
+	"os"
 
 	"github.com/alecthomas/kingpin"
 	"github.com/nickw444/miio-go"
-	"github.com/nickw444/miio-go/device"
-	"github.com/nickw444/miio-go/protocol"
-
 	"github.com/nickw444/miio-go/common"
-	"github.com/nickw444/miio-go/subscription"
+	"github.com/nickw444/miio-go/protocol"
+	"github.com/nickw444/miio-go/protocol/tokens"
 	"github.com/sirupsen/logrus"
 )
 
-func onNewDevice(dev common.Device) {
-	switch dev.(type) {
-	case *device.Yeelight:
-		fmt.Printf("Found Yeelight :)\n")
-	case *device.PowerPlug:
-		fmt.Println("Found PowerPlug")
-		d := dev.(*device.PowerPlug)
-		sub, err := d.NewSubscription()
-		if err != nil {
-			panic(err)
-		}
-		go watchSubscription(sub)
-		go tick(d)
+var sharedClient *miio.Client
 
-	default:
-		fmt.Printf("Unknown device type %T\n", dev)
-	}
-}
-
-func watchSubscription(sub subscription.Subscription) {
-	for event := range sub.Events() {
-		fmt.Printf("New Sub Event: %T\n", event)
-	}
-}
-
-func tick(d *device.PowerPlug) {
-	currState := false
-	for {
-		select {
-		case <-time.After(time.Second * 5):
-			var s common.PowerState
-			if currState {
-				s = common.PowerStateOn
-			} else {
-				s = common.PowerStateOff
-			}
-			currState = !currState
-			d.SetPower(s)
-		}
-	}
-}
-
-func main() {
-	var (
-		local = kingpin.Flag("local", "Send broadcast to 127.0.0.1 instead of 255.255.255.255 (For use with locally hosted simulator)").Bool()
-	)
-
-	kingpin.Parse()
-
-	l := logrus.New()
-	l.SetLevel(logrus.InfoLevel)
-	common.SetLogger(l)
-
+func createClient(local bool) (*miio.Client, error) {
 	addr := net.IPv4bcast
-	if *local {
+	if local {
 		addr = net.IPv4(127, 0, 0, 1)
+	}
+
+	tokenStore, err := tokens.FromFile("tokens.txt")
+	if err != nil {
+		panic(err)
 	}
 
 	proto, err := protocol.NewProtocol(protocol.ProtocolConfig{
 		BroadcastIP: addr,
+		TokenStore:  tokenStore,
 	})
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	client, err := miio.NewClientWithProtocol(proto)
-	if err != nil {
-		panic(err)
-	}
+	return miio.NewClientWithProtocol(proto)
+}
 
-	sub, err := client.NewSubscription()
-	if err != nil {
-		panic(err)
-	}
+func main() {
+	app := kingpin.New("miio-go CLI", "CLI application to manually test miio-go functionality")
+	local := app.Flag("local", "Send broadcast to 127.0.0.1 instead of 255.255.255.255 (For use with locally hosted simulator)").Bool()
+	logLevel := app.Flag("log-level", "Set MiiO to a specific log level").Default("warn").Enum("debug", "warn", "info", "error")
 
-	for event := range sub.Events() {
-		switch event.(type) {
-		case common.EventNewDevice:
-			dev := event.(common.EventNewDevice).Device
-			onNewDevice(dev)
-			fmt.Printf("New device event %T\n", dev)
-		case common.EventExpiredDevice:
-			fmt.Println("Expired device event")
-		default:
-			fmt.Println("Uknown event")
-		}
-	}
+	installControl(app)
+	installDiscovery(app)
+
+	app.Action(func(ctx *kingpin.ParseContext) error {
+		level, _ := logrus.ParseLevel(*logLevel)
+		l := logrus.New()
+		l.SetLevel(level)
+		common.SetLogger(l)
+
+		var err error
+		sharedClient, err = createClient(*local)
+		return err
+	})
+
+	kingpin.MustParse(app.Parse(os.Args[1:]))
 }

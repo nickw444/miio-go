@@ -13,6 +13,7 @@ func NewSimulatedYeelight(baseDevice *BaseDevice) *SimulatedYeelight {
 		Model: "yeelink.light.color1",
 	})
 	baseDevice.AddCapability(&capability.Power{})
+	baseDevice.AddCapability(&capability.Light{})
 
 	return &SimulatedYeelight{
 		BaseDevice: baseDevice,

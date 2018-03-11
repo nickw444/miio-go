@@ -120,6 +120,22 @@ func (_m *Device) GetProduct() (product.Product, error) {
 	return r0, r1
 }
 
+// GetToken provides a mock function with given fields:
+func (_m *Device) GetToken() []byte {
+	ret := _m.Called()
+
+	var r0 []byte
+	if rf, ok := ret.Get(0).(func() []byte); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]byte)
+		}
+	}
+
+	return r0
+}
+
 // Handle provides a mock function with given fields: _a0
 func (_m *Device) Handle(_a0 *packet.Packet) error {
 	ret := _m.Called(_a0)

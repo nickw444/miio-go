@@ -22,14 +22,15 @@ type baseDevice struct {
 	id          uint32
 	provisional bool
 	seen        time.Time
+	token       []byte
 }
 
 type InfoResponse struct {
 	Result common.DeviceInfo `json:"result"`
-	ID     int32             `json:"ID"`
+	ID     uint32            `json:"ID"`
 }
 
-func New(deviceId uint32, transport transport.Outbound, seen time.Time) Device {
+func New(deviceId uint32, transport transport.Outbound, seen time.Time, token []byte) Device {
 	throttle := rthrottle.NewRefreshThrottle(time.Second * 5)
 	b := &baseDevice{
 		SubscriptionTarget: subscription.NewTarget(),
@@ -38,6 +39,7 @@ func New(deviceId uint32, transport transport.Outbound, seen time.Time) Device {
 		outbound:        transport,
 		id:              deviceId,
 		seen:            seen,
+		token:           token,
 	}
 	b.init()
 	return b
@@ -120,4 +122,8 @@ func (b *baseDevice) RefreshThrottle() <-chan struct{} {
 
 func (b *baseDevice) Outbound() transport.Outbound {
 	return b.outbound
+}
+
+func (b *baseDevice) GetToken() []byte {
+	return b.token
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/nickw444/miio-go/common"
 	"github.com/nickw444/miio-go/device"
 	"github.com/nickw444/miio-go/protocol/packet"
+	"github.com/nickw444/miio-go/protocol/tokens"
 	"github.com/nickw444/miio-go/protocol/transport"
 	"github.com/nickw444/miio-go/subscription"
 )
@@ -26,23 +27,26 @@ type protocol struct {
 	expireAfter   time.Duration
 	clock         clock.Clock
 	lastDiscovery time.Time
+	tokenStore    tokens.TokenStore
 
-	broadcastDev device.Device
-	quitChan     chan struct{}
-	devicesMutex sync.RWMutex
-	devices      map[uint32]device.Device
+	broadcastDev   device.Device
+	quitChan       chan struct{}
+	devicesMutex   sync.RWMutex
+	devices        map[uint32]device.Device
+	ignoredDevices map[uint32]bool
 
 	transport     transport.Transport
 	deviceFactory DeviceFactory
 	cryptoFactory CryptoFactory
 }
 
-type DeviceFactory func(deviceId uint32, outbound transport.Outbound, seen time.Time) device.Device
+type DeviceFactory func(deviceId uint32, outbound transport.Outbound, seen time.Time, token []byte) device.Device
 type CryptoFactory func(deviceID uint32, deviceToken []byte, initialStamp uint32, stampTime time.Time) (packet.Crypto, error)
 
 type ProtocolConfig struct {
 	// Required config
 	BroadcastIP net.IP
+	TokenStore  tokens.TokenStore
 
 	// Optional config
 	ListenPort int // Defaults to a random system-assigned port if not provided.
@@ -61,8 +65,8 @@ func NewProtocol(c ProtocolConfig) (Protocol, error) {
 	}
 
 	t := transport.NewTransport(s)
-	deviceFactory := func(deviceId uint32, outbound transport.Outbound, seen time.Time) device.Device {
-		return device.New(deviceId, outbound, seen)
+	deviceFactory := func(deviceId uint32, outbound transport.Outbound, seen time.Time, token []byte) device.Device {
+		return device.New(deviceId, outbound, seen, token)
 	}
 	cryptoFactory := func(deviceID uint32, deviceToken []byte, initialStamp uint32, stampTime time.Time) (packet.Crypto, error) {
 		return packet.NewCrypto(deviceID, deviceToken, initialStamp, stampTime, clk)
@@ -72,15 +76,16 @@ func NewProtocol(c ProtocolConfig) (Protocol, error) {
 		IP:   c.BroadcastIP,
 		Port: 54321,
 	}
-	broadcastDev := deviceFactory(0, t.NewOutbound(nil, addr), time.Time{})
+	broadcastDev := deviceFactory(0, t.NewOutbound(nil, addr), time.Time{}, nil)
 
-	p := newProtocol(clk, t, deviceFactory, cryptoFactory, subscription.NewTarget(), broadcastDev)
+	p := newProtocol(clk, t, deviceFactory, cryptoFactory, subscription.NewTarget(), broadcastDev, c.TokenStore)
 	p.start()
 	return p, nil
 }
 
 func newProtocol(c clock.Clock, transport transport.Transport, deviceFactory DeviceFactory,
-	crptoFactory CryptoFactory, target subscription.SubscriptionTarget, broadcastDev device.Device) *protocol {
+	crptoFactory CryptoFactory, target subscription.SubscriptionTarget, broadcastDev device.Device,
+	tokenStore tokens.TokenStore) *protocol {
 
 	p := &protocol{
 		SubscriptionTarget: target,
@@ -91,6 +96,8 @@ func newProtocol(c clock.Clock, transport transport.Transport, deviceFactory Dev
 		quitChan:           make(chan struct{}),
 		devices:            make(map[uint32]device.Device),
 		broadcastDev:       broadcastDev,
+		tokenStore:         tokenStore,
+		ignoredDevices:     make(map[uint32]bool),
 	}
 	return p
 }
@@ -156,23 +163,43 @@ func (p *protocol) Discover() error {
 }
 func (p *protocol) process(pkt *packet.Packet) {
 	common.Log.Debugf("Processing incoming packet from %s", pkt.Meta.Addr)
+	if ok, _ := p.ignoredDevices[pkt.Header.DeviceID]; ok {
+		return
+	}
 
 	dev := p.getDevice(pkt.Header.DeviceID)
 	if dev == nil && pkt.DataLength() == 0 {
 		// Device response to a Hello packet.
-		crypto, err := p.cryptoFactory(pkt.Header.DeviceID, pkt.Header.Checksum, pkt.Header.Stamp,
+		common.Log.Debugf("Device with id %d responded to Hello packet.", pkt.Header.DeviceID)
+
+		deviceToken := pkt.Header.Checksum
+		if pkt.HasZeroChecksum() {
+			token, err := p.tokenStore.GetToken(pkt.Header.DeviceID)
+			if err != nil {
+				common.Log.Warnf("Device with id %d is not revealing its token. You must manually collect this token and add it to the store.", pkt.Header.DeviceID)
+				p.ignoredDevices[pkt.Header.DeviceID] = true
+				p.Publish(common.EventNewMaskedDevice{DeviceID: pkt.Header.DeviceID})
+				return
+			} else {
+				common.Log.Debugf("Loaded token for device %d from store", pkt.Header.DeviceID)
+				deviceToken = token
+			}
+		}
+
+		crypto, err := p.cryptoFactory(pkt.Header.DeviceID, deviceToken, pkt.Header.Stamp,
 			pkt.Meta.DecodeTime)
 		if err != nil {
 			panic(err)
 		}
 
 		t := p.transport.NewOutbound(crypto, pkt.Meta.Addr)
-		baseDev := p.deviceFactory(pkt.Header.DeviceID, t, pkt.Meta.DecodeTime)
+		baseDev := p.deviceFactory(pkt.Header.DeviceID, t, pkt.Meta.DecodeTime, deviceToken)
 
 		// Store the provisional device for now to ensure it can handle subsequent
 		// packets that may occur during classification.
 		p.addDevice(baseDev)
 
+		common.Log.Infof("Classifying device...")
 		dev, err := device.Classify(baseDev)
 		if err != nil {
 			panic(err)

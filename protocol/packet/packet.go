@@ -72,6 +72,15 @@ func (p *Packet) DataLength() int {
 	return len(p.Data)
 }
 
+func (p *Packet) HasZeroChecksum() bool {
+	for _, b := range p.Header.Checksum {
+		if b != 0 {
+			return false
+		}
+	}
+	return true
+}
+
 func (p *Packet) Verify(deviceToken []byte) error {
 	var tmpPacket Packet
 	tmpPacket = *p

@@ -1,0 +1,6 @@
+# MiiO Go TokenStore data file.
+# Format:
+# deviceID=deviceToken (hex)
+
+123456=ffffffffffffffffffffffffffffffff
+111222=badcafefffffffffffffffffffffffff

@@ -50,6 +50,8 @@ func TestClassify_PowerPlug(t *testing.T) {
 
 func TestClassify_Yeelight(t *testing.T) {
 	baseDev := Classify_SetUp(product.Yeelight)
+	baseDev.On("RefreshThrottle").Return(nil)
+
 	dev, err := Classify(baseDev)
 
 	assert.NoError(t, err)
@@ -58,6 +60,7 @@ func TestClassify_Yeelight(t *testing.T) {
 
 func TestClassify_Unknown(t *testing.T) {
 	baseDev := Classify_SetUp(product.Unknown)
+
 	_, err := Classify(baseDev)
 
 	assert.Error(t, err)

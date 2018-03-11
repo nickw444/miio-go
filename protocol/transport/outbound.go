@@ -24,16 +24,14 @@ type OutboundConn interface {
 type Outbound interface {
 	// Handle handles incoming packets and triggers waiting continuations.
 	Handle(pkt *packet.Packet) error
-	// Call makes a call, waits for a response and returns the raw bytes returned.
+	// Call makes a call, waits for a Response and returns the raw bytes returned.
 	Call(method string, params interface{}) ([]byte, error)
-	// CallAndDeserialize makes a call, waits for a response and deserialises the JSON
+	// CallAndDeserialize makes a call, waits for a Response and deserialises the JSON
 	// payload into `ret`.
 	CallAndDeserialize(method string, params interface{}, resp interface{}) error
-	// Send will send a raw packet without waiting for a response.
+	// Send will send a raw packet without waiting for a Response.
 	Send(packet *packet.Packet) error
 }
-
-type requestID uint32
 
 type outbound struct {
 	maxRetries int
@@ -45,9 +43,9 @@ type outbound struct {
 	dest   net.Addr
 	socket OutboundConn
 
-	nextReqID          requestID
+	nextReqID          uint32
 	continuationsMutex sync.RWMutex
-	continuations      map[requestID]chan []byte
+	continuations      map[uint32]chan []byte
 }
 
 func NewOutbound(crypto packet.Crypto, dest net.Addr, socket OutboundConn) Outbound {
@@ -65,7 +63,7 @@ func newOutbound(maxRetries int, timeout time.Duration, clock clock.Clock, crypt
 		socket:     socket,
 
 		nextReqID:     1,
-		continuations: make(map[requestID]chan []byte),
+		continuations: make(map[uint32]chan []byte),
 	}
 }
 
@@ -90,7 +88,7 @@ func (o *outbound) Handle(pkt *packet.Packet) error {
 		return err
 	}
 
-	// Lookup the response ID and pass data to the appropriate continuation goroutine.
+	// Lookup the Response ID and pass data to the appropriate continuation goroutine.
 	o.continuationsMutex.RLock()
 	if ch, ok := o.continuations[resp.ID]; ok {
 		common.Log.Debugf("Callback with ID %d was reconciled", resp.ID)
@@ -104,25 +102,25 @@ func (o *outbound) Handle(pkt *packet.Packet) error {
 }
 
 func (o *outbound) Call(method string, params interface{}) ([]byte, error) {
-	defer func() { o.nextReqID++ }()
-
 	// Setup a continuation channel
 	o.continuationsMutex.Lock()
+	requestId := o.nextReqID
+	o.nextReqID++
 	ch := make(chan []byte)
-	o.continuations[o.nextReqID] = ch
+	o.continuations[requestId] = ch
 	o.continuationsMutex.Unlock()
 
 	// Ensure we cleanup.
 	defer func() {
 		o.continuationsMutex.Lock()
-		delete(o.continuations, o.nextReqID)
+		delete(o.continuations, requestId)
 		close(ch)
 		o.continuationsMutex.Unlock()
 	}()
 
 	for i := 0; i < o.maxRetries+1; i++ {
 		// Perform the call
-		err := o.call(o.nextReqID, method, params)
+		err := o.call(requestId, method, params)
 		if err != nil {
 			return nil, err
 		}
@@ -131,23 +129,23 @@ func (o *outbound) Call(method string, params interface{}) ([]byte, error) {
 		case data := <-ch:
 			return data, nil
 		case <-o.clock.After(o.timeout):
-			common.Log.Debugf("Timed out whilst waiting for response.")
+			common.Log.Debugf("Timed out whilst waiting for Response.")
 			continue
 		}
 	}
 
-	err := fmt.Errorf("Max retries exceeded whilst sending request to device %s", o.dest)
+	err := fmt.Errorf("Max retries exceeded whilst sending Request to device %s", o.dest)
 	common.Log.Error(err)
 	return nil, err
 }
 
 func (o *outbound) CallAndDeserialize(method string, params interface{}, ret interface{}) error {
 	resp, err := o.Call(method, params)
-	err = json.Unmarshal(resp, ret)
 	if err != nil {
 		return err
 	}
-	return nil
+
+	return json.Unmarshal(resp, ret)
 }
 
 func (o *outbound) Send(packet *packet.Packet) error {
@@ -156,8 +154,8 @@ func (o *outbound) Send(packet *packet.Packet) error {
 	return err
 }
 
-// Call out to the device, but don't wait for a response.
-func (o *outbound) call(requestId requestID, method string, params interface{}) (err error) {
+// Call out to the device, but don't wait for a Response.
+func (o *outbound) call(requestId uint32, method string, params interface{}) (err error) {
 	data, err := json.Marshal(Request{
 		ID:     requestId,
 		Method: method,
@@ -177,12 +175,12 @@ func (o *outbound) call(requestId requestID, method string, params interface{}) 
 }
 
 type Response struct {
-	ID     requestID   `json:"id"`
+	ID     uint32      `json:"id"`
 	Result interface{} `json:"result"`
 }
 
 type Request struct {
-	ID     requestID   `json:"id"`
+	ID     uint32      `json:"id"`
 	Method string      `json:"method"`
 	Params interface{} `json:"params"`
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/nickw444/miio-go/device"
 	deviceMocks "github.com/nickw444/miio-go/device/mocks"
 	"github.com/nickw444/miio-go/protocol/packet"
+	"github.com/nickw444/miio-go/protocol/tokens"
 	"github.com/nickw444/miio-go/protocol/transport"
 	transportMocks "github.com/nickw444/miio-go/protocol/transport/mocks"
 	subscriptionMocks "github.com/nickw444/miio-go/subscription/common/mocks"
@@ -30,7 +31,7 @@ func Protocol_SetUp() (tt struct {
 	tt.clk = clock.NewMock()
 	tt.transport = &mockTransport{new(transportMocks.Inbound)}
 	tt.subscriptionTarget = new(subscriptionMocks.SubscriptionTarget)
-	tt.deviceFactory = func(deviceId uint32, outbound transport.Outbound, seen time.Time) device.Device {
+	tt.deviceFactory = func(deviceId uint32, outbound transport.Outbound, seen time.Time, token []byte) device.Device {
 		d := &deviceMocks.Device{}
 		tt.devices = append(tt.devices, d)
 		return d
@@ -40,7 +41,8 @@ func Protocol_SetUp() (tt struct {
 	}
 	tt.broadcastDevice = &deviceMocks.Device{}
 	tt.broadcastDevice.On("Discover").Return(nil)
-	tt.protocol = newProtocol(tt.clk, tt.transport, tt.deviceFactory, tt.cryptoFactory, tt.subscriptionTarget, tt.broadcastDevice)
+	tt.protocol = newProtocol(tt.clk, tt.transport, tt.deviceFactory, tt.cryptoFactory, tt.subscriptionTarget,
+		tt.broadcastDevice, tokens.New())
 	return
 }
 

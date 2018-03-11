@@ -17,9 +17,9 @@ This implementation has been design with the following concerns:
 At the moment, only the following devices are officially supported by this library. Feel free to
 [submit a pull request](), I'd be more than happy to have more devices supported by this library.
 
- - Xiaomi Mi Smart WiFi Socket (v1 - no USB)
+ - Xiaomi Mi Smart WiFi Socket (v1 - no USB) (chuangmi.plug.m1)
+ - Xiamoi Yeelight (yeelink.light.color1)
 
-[API Documentation can be found here]()
 
 ## Simulator
 
@@ -36,4 +36,41 @@ Documentation coming soon...
 Documentation coming soon...
 
 ## CLI
-Documentation coming soon...
+
+A CLI exists to allow controlling devices using this library.
+
+```
+usage: miio-go CLI [<flags>] <command> [<args> ...]
+
+CLI application to manually test miio-go functionality
+
+Flags:
+  --help            Show context-sensitive help (also try --help-long and --help-man).
+  --local           Send broadcast to 127.0.0.1 instead of 255.255.255.255 (For use with locally hosted simulator)
+  --log-level=warn  Set MiiO to a specific log level
+
+Commands:
+  help [<command>...]
+    Show help.
+
+
+  control brightness <brightness>
+    Set device brightness
+
+
+  control power <state>
+    Set device power
+
+
+  control color hsv <hue> <saturation>
+    Set color using HSV values
+
+
+  control color rgb <red> <green> <blue>
+    Set color using RGB values
+
+
+  discover
+    Discover devices on the local network
+
+```

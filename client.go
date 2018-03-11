@@ -7,6 +7,7 @@ import (
 
 	"github.com/nickw444/miio-go/common"
 	"github.com/nickw444/miio-go/protocol"
+	"github.com/nickw444/miio-go/protocol/tokens"
 	"github.com/nickw444/miio-go/subscription"
 )
 
@@ -22,8 +23,14 @@ type Client struct {
 
 // NewClient creates a new default Client with the protocol.
 func NewClient() (*Client, error) {
+	tokenStore, err := tokens.FromFile("tokens.txt")
+	if err != nil {
+		return nil, err
+	}
+
 	protocolConfig := protocol.ProtocolConfig{
 		BroadcastIP: net.IPv4bcast,
+		TokenStore:  tokenStore,
 	}
 
 	p, err := protocol.NewProtocol(protocolConfig)

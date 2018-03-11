@@ -3,7 +3,7 @@
 
 local wssdl = require 'wssdl'
 
-foo = wssdl.packet
+miio = wssdl.packet
 {
   magic     : u16()
             : hex();

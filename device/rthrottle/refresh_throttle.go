@@ -39,9 +39,6 @@ func (r *refreshThrottle) Start() {
 	if r.ticker == nil {
 		r.quitChan = make(chan struct{})
 		r.ticker = r.tickerFactory()
-
-		// Request a refresh immediately.
-		r.ch <- struct{}{}
 		go r.refresh()
 	}
 }
@@ -60,6 +57,9 @@ func (r *refreshThrottle) Close() {
 }
 
 func (r *refreshThrottle) refresh() {
+	// Request a refresh immediately.
+	r.ch <- struct{}{}
+
 	for {
 		select {
 		case <-r.quitChan:

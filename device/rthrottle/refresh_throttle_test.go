@@ -84,8 +84,7 @@ func TestRefreshThrottle_Start(t *testing.T) {
 	tt.throttle.Start()
 
 	// Expect an initial event.
-	assert.Len(t, ch, 1)
-	<-ch
+	race(t, ch)
 
 	// Expect an event after refresh interval
 	tt.clk.Add(tt.refreshInterval)

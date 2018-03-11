@@ -32,9 +32,7 @@ func (p *Power) SetPower(state common.PowerState) error {
 
 	// TODO NW: Use the value from the response here.
 	p.powerState = state
-	p.subscriptionTarget.Publish(common.EventUpdatePower{p.powerState})
-
-	return nil
+	return p.subscriptionTarget.Publish(common.EventUpdatePower{p.powerState})
 }
 
 func (p *Power) Update() error {
