@@ -1,6 +1,6 @@
 language: go
 go:
-  - 1.x
+  - stable
 
 env:
  - PATH=$PATH:$GOPATH/bin
