@@ -10,7 +10,6 @@ before_install:
   - go get -u github.com/mattn/goveralls
 
 install:
-  - ./bin/install_tools.sh
   - dep ensure
 
 script:

@@ -2,86 +2,155 @@
 
 
 [[projects]]
+  digest = "1:15d017551627c8bb091bde628215b2861bed128855343fdd570c62d08871f6e1"
   name = "github.com/alecthomas/kingpin"
   packages = ["."]
+  pruneopts = ""
   revision = "947dcec5ba9c011838740e680966fd7087a71d0d"
   version = "v2.2.6"
 
 [[projects]]
   branch = "master"
+  digest = "1:a74730e052a45a3fab1d310fdef2ec17ae3d6af16228421e238320846f2aaec8"
   name = "github.com/alecthomas/template"
-  packages = [".","parse"]
+  packages = [
+    ".",
+    "parse",
+  ]
+  pruneopts = ""
   revision = "a0175ee3bccc567396460bf5acd36800cb10c49c"
 
 [[projects]]
   branch = "master"
+  digest = "1:8483994d21404c8a1d489f6be756e25bfccd3b45d65821f25695577791a08e68"
   name = "github.com/alecthomas/units"
   packages = ["."]
+  pruneopts = ""
   revision = "2efee857e7cfd4f3d0138cc3cbb1b4966962b93a"
 
 [[projects]]
   branch = "master"
+  digest = "1:afaa6de27e2d86b66cf71d55096f00e32b2ef40ec3349b535555aa81c77bc7d3"
   name = "github.com/benbjohnson/clock"
   packages = ["."]
+  pruneopts = ""
   revision = "7dc76406b6d3c05b5f71a86293cbcf3c4ea03b19"
 
 [[projects]]
+  digest = "1:56c130d885a4aacae1dd9c7b71cfe39912c7ebc1ff7d2b46083c8812996dc43b"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
+  pruneopts = ""
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
   version = "v1.1.0"
 
 [[projects]]
   branch = "master"
-  name = "github.com/lunixbochs/struc"
+  digest = "1:f81d38f4fa1fc024f99b0f637e6a02c66a7ab87dacb76761906bb2ba097e1040"
+  name = "github.com/haya14busa/goverage"
   packages = ["."]
-  revision = "ef56447db6a068ad9e52bc54a1aff5fb9e1ed2dd"
+  pruneopts = ""
+  revision = "eec3514a20b55dca311300eeb08fe5c8ab9ab781"
 
 [[projects]]
+  branch = "master"
+  digest = "1:f880d3b7dfb23226b5601f4e904c60b15cd3c890708957409bbfc67f2720f8f4"
+  name = "github.com/lunixbochs/struc"
+  packages = ["."]
+  pruneopts = ""
+  revision = "02e4c2afbb2ac4bae6876f52c8273fc4cf5a4b0a"
+
+[[projects]]
+  digest = "1:256484dbbcd271f9ecebc6795b2df8cad4c458dd0f5fd82a8c2fa0c29f233411"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
+  pruneopts = ""
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:7f569d906bdd20d906b606415b7d794f798f91a62fcfb6a4daa6d50690fb7a3f"
   name = "github.com/satori/go.uuid"
   packages = ["."]
+  pruneopts = ""
   revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
   version = "v1.2.0"
 
 [[projects]]
+  digest = "1:3fcbf733a8d810a21265a7f2fe08a3353db2407da052b233f8b204b5afc03d9b"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  revision = "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
-  version = "v1.0.4"
+  pruneopts = ""
+  revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
+  version = "v1.0.6"
 
 [[projects]]
+  digest = "1:711eebe744c0151a9d09af2315f0bb729b2ec7637ef4c410fa90a18ef74b65b6"
   name = "github.com/stretchr/objx"
   packages = ["."]
-  revision = "facf9a85c22f48d2f52f2380e4efce1768749a89"
-  version = "v0.1"
+  pruneopts = ""
+  revision = "477a77ecc69700c7cdeb1fa9e129548e1c1c393c"
+  version = "v0.1.1"
 
 [[projects]]
+  digest = "1:c587772fb8ad29ad4db67575dad25ba17a51f072ff18a22b4f0257a4d9c24f75"
   name = "github.com/stretchr/testify"
-  packages = ["assert","mock"]
-  revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
-  version = "v1.2.1"
+  packages = [
+    "assert",
+    "mock",
+  ]
+  pruneopts = ""
+  revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
+  version = "v1.2.2"
 
 [[projects]]
   branch = "master"
+  digest = "1:118dd94cf4e83b566139fcb8fdcc299b9fa58d3d622867196b29d5e6416f488f"
+  name = "github.com/vektra/mockery"
+  packages = ["."]
+  pruneopts = ""
+  revision = "2a9162cbfb7a0f9094ed6f765d212a5ddee000d3"
+
+[[projects]]
+  branch = "master"
+  digest = "1:cae234a803b78380e4d769db6036b9fcc8c08ed4ff862571ffc1a958edc1f629"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "85f98707c97e11569271e4d9b3d397e079c4f4d0"
+  pruneopts = ""
+  revision = "c126467f60eb25f8f27e5a981f32a87e3965053f"
 
 [[projects]]
   branch = "master"
+  digest = "1:dd631ee90bd2e7aa16b6e094217d77a797684b52811374c948c695cbb46b5bbb"
   name = "golang.org/x/sys"
-  packages = ["unix","windows"]
-  revision = "dd2ff4accc098aceecb86b36eaa7829b2a17b1c9"
+  packages = [
+    "unix",
+    "windows",
+  ]
+  pruneopts = ""
+  revision = "bd9dbc187b6e1dacfdd2722a87e83093c2d7bd6e"
+
+[[projects]]
+  branch = "master"
+  digest = "1:5245bbf30a228b22cb61683ba5ad9641b98e0f81a9c4918394f49b40f6aa80f7"
+  name = "golang.org/x/tools"
+  packages = ["cover"]
+  pruneopts = ""
+  revision = "8cc4e8a6f4841aa92a8683fca47bc5d64b58875b"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ef567254acd773978e7534765c1bd155573953f3c778fb972b4553760ac0d9d5"
+  input-imports = [
+    "github.com/alecthomas/kingpin",
+    "github.com/benbjohnson/clock",
+    "github.com/haya14busa/goverage",
+    "github.com/lunixbochs/struc",
+    "github.com/satori/go.uuid",
+    "github.com/sirupsen/logrus",
+    "github.com/stretchr/testify/assert",
+    "github.com/stretchr/testify/mock",
+    "github.com/vektra/mockery",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
