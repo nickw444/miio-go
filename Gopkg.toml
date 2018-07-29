@@ -19,8 +19,6 @@
 #  name = "github.com/x/y"
 #  version = "2.4.0"
 
-required = ["github.com/haya14busa/goverage", "github.com/vektra/mockery", "github.com/mattn/goveralls"]
-
 
 [[constraint]]
   branch = "master"
@@ -41,15 +39,3 @@ required = ["github.com/haya14busa/goverage", "github.com/vektra/mockery", "gith
 [[constraint]]
   name = "github.com/stretchr/testify"
   version = "1.2.1"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/haya14busa/goverage"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/vektra/mockery"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/mattn/goveralls"

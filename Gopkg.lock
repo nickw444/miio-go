@@ -46,27 +46,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f81d38f4fa1fc024f99b0f637e6a02c66a7ab87dacb76761906bb2ba097e1040"
-  name = "github.com/haya14busa/goverage"
-  packages = ["."]
-  pruneopts = ""
-  revision = "eec3514a20b55dca311300eeb08fe5c8ab9ab781"
-
-[[projects]]
-  branch = "master"
   digest = "1:f880d3b7dfb23226b5601f4e904c60b15cd3c890708957409bbfc67f2720f8f4"
   name = "github.com/lunixbochs/struc"
   packages = ["."]
   pruneopts = ""
   revision = "02e4c2afbb2ac4bae6876f52c8273fc4cf5a4b0a"
-
-[[projects]]
-  branch = "master"
-  digest = "1:bd9e78092a51105ac18ac77108578d2ebdec741bfb2d17d99fc067ad2095bf57"
-  name = "github.com/mattn/goveralls"
-  packages = ["."]
-  pruneopts = ""
-  revision = "e68c968003c2db2ad7cdf07b3c012c5ab12248a7"
 
 [[projects]]
   digest = "1:256484dbbcd271f9ecebc6795b2df8cad4c458dd0f5fd82a8c2fa0c29f233411"
@@ -113,14 +97,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:118dd94cf4e83b566139fcb8fdcc299b9fa58d3d622867196b29d5e6416f488f"
-  name = "github.com/vektra/mockery"
-  packages = ["."]
-  pruneopts = ""
-  revision = "2a9162cbfb7a0f9094ed6f765d212a5ddee000d3"
-
-[[projects]]
-  branch = "master"
   digest = "1:cae234a803b78380e4d769db6036b9fcc8c08ed4ff862571ffc1a958edc1f629"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
@@ -138,28 +114,17 @@
   pruneopts = ""
   revision = "bd9dbc187b6e1dacfdd2722a87e83093c2d7bd6e"
 
-[[projects]]
-  branch = "master"
-  digest = "1:5245bbf30a228b22cb61683ba5ad9641b98e0f81a9c4918394f49b40f6aa80f7"
-  name = "golang.org/x/tools"
-  packages = ["cover"]
-  pruneopts = ""
-  revision = "8cc4e8a6f4841aa92a8683fca47bc5d64b58875b"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
     "github.com/alecthomas/kingpin",
     "github.com/benbjohnson/clock",
-    "github.com/haya14busa/goverage",
     "github.com/lunixbochs/struc",
-    "github.com/mattn/goveralls",
     "github.com/satori/go.uuid",
     "github.com/sirupsen/logrus",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/mock",
-    "github.com/vektra/mockery",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
