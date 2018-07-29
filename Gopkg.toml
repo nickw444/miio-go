@@ -19,7 +19,7 @@
 #  name = "github.com/x/y"
 #  version = "2.4.0"
 
-required = ["github.com/haya14busa/goverage", "github.com/vektra/mockery"]
+required = ["github.com/haya14busa/goverage", "github.com/vektra/mockery", "github.com/mattn/goveralls"]
 
 
 [[constraint]]
@@ -49,3 +49,7 @@ required = ["github.com/haya14busa/goverage", "github.com/vektra/mockery"]
 [[constraint]]
   branch = "master"
   name = "github.com/vektra/mockery"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/mattn/goveralls"

@@ -7,7 +7,6 @@ env:
 
 before_install:
   - go get -u github.com/golang/dep/cmd/dep
-  - go get -u github.com/mattn/goveralls
 
 install:
   - dep ensure

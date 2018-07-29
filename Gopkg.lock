@@ -61,6 +61,14 @@
   revision = "02e4c2afbb2ac4bae6876f52c8273fc4cf5a4b0a"
 
 [[projects]]
+  branch = "master"
+  digest = "1:bd9e78092a51105ac18ac77108578d2ebdec741bfb2d17d99fc067ad2095bf57"
+  name = "github.com/mattn/goveralls"
+  packages = ["."]
+  pruneopts = ""
+  revision = "e68c968003c2db2ad7cdf07b3c012c5ab12248a7"
+
+[[projects]]
   digest = "1:256484dbbcd271f9ecebc6795b2df8cad4c458dd0f5fd82a8c2fa0c29f233411"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
@@ -146,6 +154,7 @@
     "github.com/benbjohnson/clock",
     "github.com/haya14busa/goverage",
     "github.com/lunixbochs/struc",
+    "github.com/mattn/goveralls",
     "github.com/satori/go.uuid",
     "github.com/sirupsen/logrus",
     "github.com/stretchr/testify/assert",
