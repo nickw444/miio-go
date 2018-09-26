@@ -212,10 +212,10 @@ func (p *protocol) process(pkt *packet.Packet) {
 		// Known device. Handle the incoming packet.
 		err := dev.Handle(pkt)
 		if err != nil {
-			common.Log.Errorf("Unable to process packet %s for device %d. Error %s", pkt, dev.ID(), err)
+			common.Log.Errorf("Unable to process packet %v for device %d. Error %s", pkt, dev.ID(), err)
 		}
 	} else {
-		common.Log.Errorf("Unable to process packet %s. Device unknown.", pkt)
+		common.Log.Errorf("Unable to process packet %v. Device unknown.", pkt)
 	}
 }
 

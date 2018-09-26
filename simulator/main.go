@@ -32,7 +32,7 @@ func main() {
 	}
 
 	inbound := transport.NewInbound(s)
-	log.Infof("Creating device with id=%d token=%s revealToken=%b",
+	log.Infof("Creating device with id=%d token=%s revealToken=%t",
 		*deviceId, hex.EncodeToString(*deviceToken), *revealToken)
 	baseDev, err := device.NewBaseDevice(*deviceId, *deviceToken, *revealToken)
 	if err != nil {
